@@ -98,10 +98,10 @@ ${relatedCasesSummary || "関連事例情報なし"}
   }
 });
 
-// ▼▼ Reactアプリのビルド成果物を返す部分 ▼▼
-app.use(express.static(path.join(__dirname, 'public')));
+// ▼▼ Reactアプリのビルド成果物を返す部分（client/build） ▼▼
+app.use(express.static(path.join(__dirname, 'client', 'build')));
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 
 // サーバー起動
