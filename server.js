@@ -1,29 +1,37 @@
-// server.js（Render対応版・UTF-8完全版）
+// server.js（最簡易Render対応版・UTF-8）
 
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
-const path = require('path');
 const csvParser = require('csv-parser');
 const fetch = require('node-fetch');
 
 const app = express();
-const PORT = process.env.PORT || 5000; // Renderの環境変数PORTを優先
+const PORT = process.env.PORT || 5000; // Render環境向けにPORTを動的に取得
 
 app.use(cors());
 app.use(express.json());
 
 // 災害事例データベース読み込み
-let disasterData = [];
-fs.createReadStream('./data/災害事例データベース.csv', { encoding: 'utf-8' })
-  .pipe(csvParser())
-  .on('data', (row) => {
-    disasterData.push(row);
-  })
-  .on('end', () => {
-    console.log('✅ 災害事例データベース読み込み完了:', disasterData.length);
-  });
+// もともとの CSVファイル読み込み部分をコメントアウト！
+// let disasterData = [];
+// fs.createReadStream('./data/災害事例データベース.csv', { encoding: 'utf-8' })
+//   .pipe(csvParser())
+//   .on('data', (row) => {
+//     disasterData.push(row);
+//   })
+//   .on('end', () => {
+//     console.log('✅ 災害事例データベース読み込み完了:', disasterData.length);
+//   });
+
+// 代わりに仮のデータをセット
+let disasterData = [
+  { 発生状況: "コンベアで巻き込まれた", 原因: "安全装置がなかった", 対策: "安全柵の設置", "災害の種類(事故の型)": "はさまれ・巻き込まれ" },
+  { 発生状況: "高所から転落", 原因: "安全帯を着用していなかった", 対策: "安全帯の使用", "災害の種類(事故の型)": "墜落・転落" }
+];
+console.log('✅ 仮の災害事例データを使用');
+
 
 // 固定の法令情報（簡易版）
 const law = {
@@ -31,10 +39,11 @@ const law = {
   content: "労働者の安全を確保するため、事業者は必要な措置を講じる義務があります。"
 };
 
+// APIエンドポイント
 app.post('/api/report', async (req, res) => {
   const { hazard, risk, detailed } = req.body;
 
-  // 関連事例（最大5件）
+  // 関連事例（例：最大5件）
   const matchedCases = disasterData.filter(d =>
     (d['発生状況'] && d['発生状況'].includes(hazard)) ||
     (d['災害の種類(事故の型)'] && d['災害の種類(事故の型)'].includes(risk))
@@ -44,7 +53,7 @@ app.post('/api/report', async (req, res) => {
     `【事例${i + 1}】${d['発生状況']} / 原因: ${d['原因']} / 対策: ${d['対策']}`
   ).join('\n');
 
-  // プロンプト生成
+  // ChatGPTへのプロンプト生成
   const finalPrompt = `
 あなたは日本の労働安全衛生の専門家です。
 【法的要求事項】${law.article}: ${law.content}
@@ -92,15 +101,12 @@ ${relatedCasesSummary || "関連事例情報なし"}
   }
 });
 
-// クライアントのビルド成果物を静的配信
-app.use(express.static(path.join(__dirname, 'public')));
+// ⭐️ クライアント配信部分を一旦外しておく（ここがエラーの原因になることがある）
+// app.use(express.static(path.join(__dirname, 'public')));
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// });
 
-// Reactルーティング対応: 全てのGETリクエストにindex.htmlを返す
-app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// サーバー起動
 app.listen(PORT, () => {
-  console.log(`✅ Server is running on http://localhost:${PORT} (UTF-8完全版)`);
+  console.log(`✅ Server is running on http://localhost:${PORT} (UTF-8簡易版)`);
 });
