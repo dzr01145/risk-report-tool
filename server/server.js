@@ -8,7 +8,7 @@ const csvParser = require('csv-parser');
 const fetch = require('node-fetch');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000; // 👈 ここを修正
 
 app.use(cors());
 app.use(express.json());
@@ -49,10 +49,10 @@ app.post('/api/report', async (req, res) => {
     `【事例${i + 1}】${d['発生状況']} / 原因: ${d['原因']} / 対策: ${d['対策']}`
   ).join('\n');
 
-  // 法令情報（例としてhazardに対応するもの）
+  // 法令情報
   const law = LAW_ARTICLES[hazard] || { article: "なし", content: "関連情報なし" };
 
-  // 最終プロンプト（詳細版含む場合も同一APIで出力）
+  // 最終プロンプト
   const finalPrompt = `
 あなたは日本の労働安全衛生の専門家です。
 以下の【基本情報】および【関連災害事例】を踏まえ、${detailed ? "【300文字程度ずつ】" : "【150文字程度ずつ】"}で生成してください。
