@@ -1,4 +1,4 @@
-// server.js（UTF-8・完全版）
+// server.js（UTF-8・完全版・Render対応）
 
 require('dotenv').config();
 const express = require('express');
@@ -8,7 +8,7 @@ const csvParser = require('csv-parser');
 const fetch = require('node-fetch');
 
 const app = express();
-const PORT = process.env.PORT || 5000; // 👈 ここを修正
+const PORT = process.env.PORT || 5000; // 🌟 Renderの環境変数PORTに対応
 
 app.use(cors());
 app.use(express.json());
@@ -24,7 +24,7 @@ fs.createReadStream('./data/災害事例データベース.csv', { encoding: 'ut
     console.log('✅ 災害事例データベース読み込み完了。件数:', disasterData.length);
   });
 
-// 法令データ（例として静的に埋め込む場合）
+// 法令データ（例として静的に埋め込む）
 const LAW_ARTICLES = {
   "コンベヤー": {
     article: "労働安全衛生法第20条",
@@ -105,5 +105,5 @@ ${law.article}: ${law.content}
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ Server is running on http://localhost:${PORT} (UTF-8完全版)`);
+  console.log(`✅ Server is running on http://localhost:${PORT} (UTF-8完全版・Render対応)`);
 });
