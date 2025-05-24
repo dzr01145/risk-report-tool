@@ -1,4 +1,4 @@
-// server.js（UTF-8・完全版・Render対応）
+// server.js（Render対応版・UTF-8完全版）
 
 require('dotenv').config();
 const express = require('express');
@@ -8,12 +8,12 @@ const csvParser = require('csv-parser');
 const fetch = require('node-fetch');
 
 const app = express();
-const PORT = process.env.PORT || 5000; // 🌟 Renderの環境変数PORTに対応
+const PORT = process.env.PORT || 5000; // Render環境向けにPORTを動的に取得
 
 app.use(cors());
 app.use(express.json());
 
-// 事例データベース読み込み
+// 災害事例データベース読み込み
 let disasterData = [];
 fs.createReadStream('./data/災害事例データベース.csv', { encoding: 'utf-8' })
   .pipe(csvParser())
@@ -24,7 +24,7 @@ fs.createReadStream('./data/災害事例データベース.csv', { encoding: 'ut
     console.log('✅ 災害事例データベース読み込み完了。件数:', disasterData.length);
   });
 
-// 法令データ（例として静的に埋め込む）
+// 法令データ例（必要に応じて拡充可能）
 const LAW_ARTICLES = {
   "コンベヤー": {
     article: "労働安全衛生法第20条",
@@ -39,7 +39,7 @@ const LAW_ARTICLES = {
 app.post('/api/report', async (req, res) => {
   const { hazard, risk, detailed } = req.body;
 
-  // 関連事例DBから情報抽出（例：最大5件）
+  // 関連事例データベースから情報抽出（例：最大5件）
   const matchedCases = disasterData.filter(d =>
     (d['発生状況'] && d['発生状況'].includes(hazard)) ||
     (d['災害の種類(事故の型)'] && d['災害の種類(事故の型)'].includes(risk))
@@ -52,7 +52,7 @@ app.post('/api/report', async (req, res) => {
   // 法令情報
   const law = LAW_ARTICLES[hazard] || { article: "なし", content: "関連情報なし" };
 
-  // 最終プロンプト
+  // プロンプト生成
   const finalPrompt = `
 あなたは日本の労働安全衛生の専門家です。
 以下の【基本情報】および【関連災害事例】を踏まえ、${detailed ? "【300文字程度ずつ】" : "【150文字程度ずつ】"}で生成してください。
@@ -105,5 +105,5 @@ ${law.article}: ${law.content}
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ Server is running on http://localhost:${PORT} (UTF-8完全版・Render対応)`);
+  console.log(`✅ Server is running on http://localhost:${PORT} (UTF-8完全版)`);
 });
