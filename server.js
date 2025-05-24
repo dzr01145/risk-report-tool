@@ -1,14 +1,15 @@
-// server.js（Render対応版・UTF-8完全版）
+// server.js（Render対応版・UTF-8完全版・クライアントビルド配信含む）
 
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
+const path = require('path');  // 👈 クライアント配信用に追加
 const csvParser = require('csv-parser');
 const fetch = require('node-fetch');
 
 const app = express();
-const PORT = process.env.PORT || 5000; // Render環境向けにPORTを動的に取得
+const PORT = process.env.PORT || 5000;  // Renderでの動的ポート対応
 
 app.use(cors());
 app.use(express.json());
@@ -104,6 +105,15 @@ ${law.article}: ${law.content}
   }
 });
 
+// 👇 クライアントのビルド（public）を静的配信
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Reactルーティング対応: 全てのGETリクエストに index.html を返す
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// サーバー起動
 app.listen(PORT, () => {
-  console.log(`✅ Server is running on http://localhost:${PORT} (UTF-8完全版)`);
+  console.log(`✅ Server is running on http://localhost:${PORT} (UTF-8完全版・Render対応)`);
 });
