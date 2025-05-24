@@ -1,4 +1,4 @@
-// server.js（最簡易Render対応版・UTF-8）
+// server.js（Render対応版・UTF-8完全版）
 
 require('dotenv').config();
 const express = require('express');
@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000; // Renderの環境変数PORTを優先
 app.use(cors());
 app.use(express.json());
 
-// 災害事例データベース読み込み（簡易版）
+// 災害事例データベース読み込み
 let disasterData = [];
 fs.createReadStream('./data/災害事例データベース.csv', { encoding: 'utf-8' })
   .pipe(csvParser())
@@ -25,7 +25,7 @@ fs.createReadStream('./data/災害事例データベース.csv', { encoding: 'ut
     console.log('✅ 災害事例データベース読み込み完了:', disasterData.length);
   });
 
-// 固定の法令情報（最簡易）
+// 固定の法令情報（簡易版）
 const law = {
   article: "労働安全衛生法（概略）",
   content: "労働者の安全を確保するため、事業者は必要な措置を講じる義務があります。"
@@ -34,7 +34,7 @@ const law = {
 app.post('/api/report', async (req, res) => {
   const { hazard, risk, detailed } = req.body;
 
-  // 関連事例（例：最大5件）
+  // 関連事例（最大5件）
   const matchedCases = disasterData.filter(d =>
     (d['発生状況'] && d['発生状況'].includes(hazard)) ||
     (d['災害の種類(事故の型)'] && d['災害の種類(事故の型)'].includes(risk))
@@ -92,13 +92,15 @@ ${relatedCasesSummary || "関連事例情報なし"}
   }
 });
 
-// クライアントのビルドを配信
+// クライアントのビルド成果物を静的配信
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('*', (req, res) => {
+
+// Reactルーティング対応: 全てのGETリクエストにindex.htmlを返す
+app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // サーバー起動
 app.listen(PORT, () => {
-  console.log(`✅ Server is running on http://localhost:${PORT} (UTF-8最簡易版)`);
+  console.log(`✅ Server is running on http://localhost:${PORT} (UTF-8完全版)`);
 });
