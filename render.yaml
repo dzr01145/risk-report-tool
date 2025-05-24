@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: risk-report-tool
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: 'npm install'
+    startCommand: 'node server.js'
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: OPENAI_API_KEY
+        sync: false  # Renderダッシュボードで登録した環境変数を使用
