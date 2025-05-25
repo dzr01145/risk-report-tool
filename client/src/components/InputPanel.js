@@ -12,12 +12,7 @@ export default function InputPanel() {
   const recognitionRef = useRef(null);
 
   const handleSubmit = async () => {
-    const prompt = `あなたは日本の労働安全衛生の専門家です。  
-以下の「洗い出し内容」と「危険状況」をもとに、現場の背景説明を含めて危険性を文章化し、簡単な改善提案をまとめてください。  
-語尾は「〜です」「〜ます」調にしてください。
-
-洗い出し内容: ${hazard}
-危険状況: ${risk}`;
+    const prompt = `あなたは日本の労働安全衛生の専門家です。入力されたキーワードをもとに、予見しうる労働災害を踏まえた「洗い出し内容」と「危険状況」を具体的に想定・文章化し、簡単な改善提案をまとめてください。語尾は「〜です」「〜ます」調にしてください。 ${hazard}を踏まえて洗い出し内容を表記、${risk}を踏まえて危険状況を表記　それぞれ150文字`;
 
     const response = await fetch('/api/report', {
       method: 'POST',
@@ -30,12 +25,7 @@ export default function InputPanel() {
   };
 
   const handleDetailedReport = async () => {
-    const prompt = `あなたは日本の労働安全衛生の専門家です。  
-以下の「洗い出し内容」と「危険状況」をもとに、背景説明を含めて危険性を文章化し、さらに詳細な改善提案をまとめてください。  
-語尾は「〜です」「〜ます」調にしてください。
-
-洗い出し内容: ${hazard}
-危険状況: ${risk}`;
+    const prompt = `あなたは日本の労働安全衛生の専門家です。入力されたキーワードをもとに、予見しうる労働災害を踏まえた「洗い出し内容」と「危険状況」を具体的に想定・文章化し、詳細な改善提案をまとめてください。語尾は「〜です」「〜ます」調にしてください。 ${hazard}を踏まえて洗い出し内容を詳細に表記、${risk}を踏まえて危険状況を詳細に表記　それぞれ300文字`;
 
     const response = await fetch('/api/report', {
       method: 'POST',
@@ -77,35 +67,76 @@ export default function InputPanel() {
   };
 
   return (
-    <div>
-      <h2>労災リスク報告書ツール（シンプル版）</h2>
-      <label>洗い出し内容：</label><br />
-      <input type="text" value={hazard} onChange={e => setHazard(e.target.value)} placeholder="直接入力または選択" />
-      <select value={hazard} onChange={e => setHazard(e.target.value)}>
-        <option value="">選択してください</option>
-        {hazards.map(h => <option key={h} value={h}>{h}</option>)}
-      </select>
-      <button onClick={() => handleVoiceInput('hazard')}>🎤 話す</button>
-      <br /><br />
+    <div style={{ textAlign: 'center', maxWidth: '500px', margin: 'auto', fontSize: '1.1em' }}>
+      <h2 style={{ fontSize: '1.4em', marginBottom: '1em' }}>労災リスク報告書ツール（UTF-8版）</h2>
 
-      <label>危険状況：</label><br />
-      <input type="text" value={risk} onChange={e => setRisk(e.target.value)} placeholder="直接入力または選択" />
-      <select value={risk} onChange={e => setRisk(e.target.value)}>
-        <option value="">選択してください</option>
-        {risks.map(r => <option key={r} value={r}>{r}</option>)}
-      </select>
-      <button onClick={() => handleVoiceInput('risk')}>🎤 話す</button>
-      <br /><br />
+      <div style={{ marginBottom: '1em' }}>
+        <label>洗い出し内容：</label><br />
+        <input
+          type="text"
+          value={hazard}
+          onChange={e => setHazard(e.target.value)}
+          placeholder="直接入力または選択"
+          style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
+        /><br />
+        <select
+          value={hazard}
+          onChange={e => setHazard(e.target.value)}
+          style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
+        >
+          <option value="">選択してください</option>
+          {hazards.map(h => <option key={h} value={h}>{h}</option>)}
+        </select><br />
+        <button
+          onClick={() => handleVoiceInput('hazard')}
+          style={{ margin: '0.3em', fontSize: '1.1em', padding: '0.5em 1em' }}
+        >🎤 話す</button>
+      </div>
 
-      <button onClick={handleSubmit}>報告書を作成する</button><br /><br />
+      <div style={{ marginBottom: '1em' }}>
+        <label>危険状況：</label><br />
+        <input
+          type="text"
+          value={risk}
+          onChange={e => setRisk(e.target.value)}
+          placeholder="直接入力または選択"
+          style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
+        /><br />
+        <select
+          value={risk}
+          onChange={e => setRisk(e.target.value)}
+          style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
+        >
+          <option value="">選択してください</option>
+          {risks.map(r => <option key={r} value={r}>{r}</option>)}
+        </select><br />
+        <button
+          onClick={() => handleVoiceInput('risk')}
+          style={{ margin: '0.3em', fontSize: '1.1em', padding: '0.5em 1em' }}
+        >🎤 話す</button>
+      </div>
+
+      <button
+        onClick={handleSubmit}
+        style={{ margin: '1em', fontSize: '1.1em', padding: '0.5em 1em' }}
+      >報告書を作成する</button><br />
 
       {report && (
         <>
-          <pre style={{ whiteSpace: 'pre-wrap' }}>{report}</pre>
-          <button onClick={handleDetailedReport}>④ 改善提案（詳細版）</button>
+          <pre style={{ whiteSpace: 'pre-wrap', textAlign: 'left', background: '#f0f0f0', padding: '1em', borderRadius: '8px', margin: '1em 0' }}>{report}</pre>
+          <button
+            onClick={handleDetailedReport}
+            style={{ margin: '1em', fontSize: '1.1em', padding: '0.5em 1em' }}
+          >④ 改善提案（詳細版）</button>
         </>
       )}
-      {detailedReport && <pre style={{ whiteSpace: 'pre-wrap', color: 'darkblue' }}>{detailedReport}</pre>}
+
+      {detailedReport && (
+        <pre style={{ whiteSpace: 'pre-wrap', color: 'darkblue', textAlign: 'left', background: '#f0f0f0', padding: '1em', borderRadius: '8px', margin: '1em 0' }}>
+          {detailedReport}
+        </pre>
+      )}
+
       {transcriptText && <p>{transcriptText}</p>}
     </div>
   );
