@@ -12,22 +12,24 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// ▼▼ テスト用：仮のデータ ▼▼
+// ▼▼ 仮のデータ（例：テストデータ） ▼▼
 let disasterData = [
   { 発生状況: "コンベアで巻き込まれた", 原因: "安全装置がなかった", 対策: "安全柵の設置", "災害の種類(事故の型)": "はさまれ・巻き込まれ" },
   { 発生状況: "高所から転落", 原因: "安全帯を着用していなかった", 対策: "安全帯の使用", "災害の種類(事故の型)": "墜落・転落" }
 ];
 console.log('✅ 仮の災害事例データを使用');
 
+// ▼ 法的要求事項（例） ▼
 const law = {
   article: "労働安全衛生法（概略）",
   content: "労働者の安全を確保するため、事業者は必要な措置を講じる義務があります。"
 };
 
-// APIエンドポイント
+// ▼ APIエンドポイント ▼
 app.post('/api/report', async (req, res) => {
-  const { hazard, risk, detailed } = req.body;
+  const { hazard, risk, prompt } = req.body;
 
+  // 関連事例抽出（最大5件）
   const matchedCases = disasterData.filter(d =>
     (d['発生状況'] && d['発生状況'].includes(hazard)) ||
     (d['災害の種類(事故の型)'] && d['災害の種類(事故の型)'].includes(risk))
@@ -37,24 +39,8 @@ app.post('/api/report', async (req, res) => {
     `【事例${i + 1}】${d['発生状況']} / 原因: ${d['原因']} / 対策: ${d['対策']}`
   ).join('\n');
 
-  const finalPrompt = `
-あなたは日本の労働安全衛生の専門家です。
-【法的要求事項】${law.article}: ${law.content}
-
-【基本情報】
-洗い出し内容：「${hazard}」
-危険状況：「${risk}」
-
-【関連災害事例】
-${relatedCasesSummary || "関連事例情報なし"}
-
-出力フォーマット：
-① 洗い出し内容：
-② 危険状況：
-③ 改善提案：（優先順位：法令順守、本質安全、工学的、管理的、保護具の順。「〜をお勧めします」「〜が望まれます」で締めてください）
-
-全て比較的フォーマルな口語体（「〜です」「〜ます」調）で出力してください。
-`;
+  // finalPromptはフロントエンドから送られてきたpromptをそのまま使用
+  const finalPrompt = prompt;
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -84,10 +70,10 @@ ${relatedCasesSummary || "関連事例情報なし"}
   }
 });
 
-// ▼▼ Render対応のパスに修正（1つ上に出てからクライアント配信） ▼▼
-app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
+// ▼ Reactアプリのビルド成果物を返す部分（client/build） ▼
+app.use(express.static(path.join(__dirname, 'client', 'build')));
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.html'));
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 
 // サーバー起動
