@@ -15,7 +15,7 @@ export default function InputPanel() {
 ① 洗い出し内容：
 解体作業現場において、散乱した旧木材や壁材から露出した釘を踏み抜くリスクがあります。
 ② 危険状況：
-歩行経路上に未除去の釘があり、作業者が安全靴を着用していても足底を貫通し、転倒や刺創事故を招くおそれがあります。
+歩行経路上に未除去の釘があり、作業者の不注意などの要因からが安全靴を着用していても足底を貫通し、転倒や刺創事故を招くおそれがあります。
 ③ 改善提案：
 敷地内の定期的な清掃と歩行ルートの明確化を徹底し、安全靴の点検・交換基準を強化します。`;
 
@@ -43,14 +43,46 @@ ${exampleText}
 
   const handleDetailedReport = async () => {
     const prompt = `あなたは日本の労働安全衛生の専門家です。
-以下のキーワードをもとに、洗い出し内容・危険状況を背景説明を含めて200文字程度で詳細に文章化し、その後に改善提案をカテゴリごとに200文字程度でまとめてください。
-最後に必ず関連する災害事例を3件、簡潔な文章でまとめて載せてください。
+以下のキーワードでタイトルを表示するとともとに、関連する内容を背景説明を含めて200文字程度で要点をまとめつつわかりやすく文章化
+
+なお、法的要求事項は前段の洗い出し内容と危険状況を必ず背景説明を踏まえ以下のe-Gov法令検索URLを根拠に、  
+条文番号とその内容（各項目150文字程度以内）を作成してください。  
+語尾は「〜です」「〜ます」調にしてください。
+
+【e-Gov法令検索URL】  
+1. 労働安全衛生法：https://elaws.e-gov.go.jp/document?lawid=347AC0000000057  
+2. 労働安全衛生法施行令：https://elaws.e-gov.go.jp/document?lawid=347CO0000000318  
+3. 労働安全衛生規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080032  
+4. 特定化学物質障害予防規則：https://elaws.e-gov.go.jp/document?lawid=353M50000080039  
+5. 有機溶剤中毒予防規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080036  
+6. 鉛中毒予防規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080035  
+7. 石綿障害予防規則：https://elaws.e-gov.go.jp/document?lawid=417M60000080021  
+8. 酸素欠乏症等防止規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080033  
+9. 電離放射線障害防止規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080041  
+10. 事務所衛生基準規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080043  
+
+
+最後に必ず洗い出し内容と危険状況に関連する災害事例を3件、タイトルと簡潔な文章で番号付きでまとめて載せてください。
 出力には法令のURLを一切載せないようにしてください。
 語尾は「〜です」「〜ます」調にしてください。
 
 【キーワード】
-洗い出し内容: ${hazard}
-危険状況: ${risk}`;
+
+・洗い出し内容: ${hazard}
+
+・危険状況: ${risk}`;
+
+［改善提案詳細］
+
+① 洗い出し内容：  （300文字程度）
+② 危険状況：  （300文字程度）
+③ 改善提案：  
+(1) 法的要求事項の遵守（300文字程度　　例：・労働安全衛生法第〇条：***********）  
+(2) 本質的対策（300文字程度）  
+(3) 工学的対策（300文字程度）  
+(4) 管理的対策（300文字程度）  
+(5) 保護具の使用（300文字程度）  
+
 
     const response = await fetch('/api/report', {
       method: 'POST',
@@ -93,7 +125,7 @@ ${exampleText}
 
   return (
     <div style={{ textAlign: 'center', maxWidth: '500px', margin: 'auto', fontSize: '1.1em' }}>
-      <h2 style={{ fontSize: '1.4em', marginBottom: '1em' }}>労災リスク報告書ツール（例文指示・法令根拠版）</h2>
+      <h2 style={{ fontSize: '1.4em', marginBottom: '1em' }}>労働災害リスクファインディングツール</h2>
 
       <div style={{ marginBottom: '1em' }}>
         <label>洗い出し内容：</label><br />
