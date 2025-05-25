@@ -127,8 +127,10 @@ ${exampleText}
     <div style={{ textAlign: 'center', maxWidth: '500px', margin: 'auto', fontSize: '1.1em' }}>
       <h2 style={{ fontSize: '1.4em', marginBottom: '1em' }}>労働災害リスクファインディングツール</h2>
 
+
+
       <div style={{ marginBottom: '1em' }}>
-        <label>洗い出し内容：</label><br />
+        <label style={{ fontWeight: 'bold', fontSize: '1.2em' }}>【洗い出し内容】</label><br />
         <input
           type="text"
           value={hazard}
@@ -136,6 +138,8 @@ ${exampleText}
           placeholder="直接入力または選択"
           style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
         /><br />
+
+
         <select
           value={hazard}
           onChange={e => setHazard(e.target.value)}
@@ -150,8 +154,11 @@ ${exampleText}
         >🎤 話す</button>
       </div>
 
+
+
+
       <div style={{ marginBottom: '1em' }}>
-        <label>危険状況：</label><br />
+        <label style={{ fontWeight: 'bold', fontSize: '1.2em' }}>【危険状況】</label><br />
         <input
           type="text"
           value={risk}
@@ -159,6 +166,8 @@ ${exampleText}
           placeholder="直接入力または選択"
           style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
         /><br />
+
+
         <select
           value={risk}
           onChange={e => setRisk(e.target.value)}
