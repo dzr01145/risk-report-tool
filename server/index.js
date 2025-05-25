@@ -1,5 +1,3 @@
-// server.js（最簡易・Render対応・Reactクライアント画面を返す）
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -9,23 +7,12 @@ const csvParser = require('csv-parser');
 const fetch = require('node-fetch');
 
 const app = express();
-const PORT = process.env.PORT || 5000; // Render環境向けにPORTを動的に取得
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
 
-// ▼▼ 本番では本当のCSVファイルを読み込む部分 ▼▼
-// let disasterData = [];
-// fs.createReadStream('./data/災害事例データベース.csv', { encoding: 'utf-8' })
-//   .pipe(csvParser())
-//   .on('data', (row) => {
-//     disasterData.push(row);
-//   })
-//   .on('end', () => {
-//     console.log('✅ 災害事例データベース読み込み完了:', disasterData.length);
-//   });
-
-// ▼▼ テスト用：仮のデータをセット ▼▼
+// ▼▼ テスト用：仮のデータ ▼▼
 let disasterData = [
   { 発生状況: "コンベアで巻き込まれた", 原因: "安全装置がなかった", 対策: "安全柵の設置", "災害の種類(事故の型)": "はさまれ・巻き込まれ" },
   { 発生状況: "高所から転落", 原因: "安全帯を着用していなかった", 対策: "安全帯の使用", "災害の種類(事故の型)": "墜落・転落" }
@@ -41,7 +28,6 @@ const law = {
 app.post('/api/report', async (req, res) => {
   const { hazard, risk, detailed } = req.body;
 
-  // 関連事例抽出（最大5件）
   const matchedCases = disasterData.filter(d =>
     (d['発生状況'] && d['発生状況'].includes(hazard)) ||
     (d['災害の種類(事故の型)'] && d['災害の種類(事故の型)'].includes(risk))
@@ -98,10 +84,10 @@ ${relatedCasesSummary || "関連事例情報なし"}
   }
 });
 
-// ▼▼ Reactアプリのビルド成果物を返す部分（client/build） ▼▼
-app.use(express.static(path.join(__dirname, 'client', 'build')));
+// ▼▼ Render対応のパスに修正（1つ上に出てからクライアント配信） ▼▼
+app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.html'));
 });
 
 // サーバー起動
