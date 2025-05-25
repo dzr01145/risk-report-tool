@@ -13,19 +13,11 @@ export default function InputPanel() {
 
   const handleSubmit = async () => {
     const prompt = `あなたは日本の労働安全衛生の専門家です。  
-以下のキーワードは参考情報であり、出力に含めないでください。  
-このキーワードをもとに、必ず洗い出し内容・危険状況を文章化し、各項目150文字以内で簡易報告を作成してください。  
+以下の「洗い出し内容」と「危険状況」をもとに、現場の背景説明を含めて危険性を文章化し、簡単な改善提案をまとめてください。  
 語尾は「〜です」「〜ます」調にしてください。
 
-【キーワード（出力に含めないでください）】  
-洗い出し内容: 「${hazard}」  
-危険状況: 「${risk}」
-
-【出力構成】  
-【簡易報告】  
-① 洗い出し内容（150文字以内）  
-② 危険状況（150文字以内）  
-③ 改善提案（150文字以内）`;
+洗い出し内容: ${hazard}
+危険状況: ${risk}`;
 
     const response = await fetch('/api/report', {
       method: 'POST',
@@ -39,38 +31,11 @@ export default function InputPanel() {
 
   const handleDetailedReport = async () => {
     const prompt = `あなたは日本の労働安全衛生の専門家です。  
-以下のキーワードは参考情報であり、出力に含めないでください。  
-このキーワードをもとに、洗い出し内容・危険状況を背景説明を含めて文章化し、詳細報告を各項目300文字以内で作成してください。  
+以下の「洗い出し内容」と「危険状況」をもとに、背景説明を含めて危険性を文章化し、さらに詳細な改善提案をまとめてください。  
 語尾は「〜です」「〜ます」調にしてください。
 
-【キーワード（出力に含めないでください）】  
-洗い出し内容: 「${hazard}」  
-危険状況: 「${risk}」
-
-【e-Gov法令検索URL】  
-1. 労働安全衛生法：https://elaws.e-gov.go.jp/document?lawid=347AC0000000057  
-2. 労働安全衛生法施行令：https://elaws.e-gov.go.jp/document?lawid=347CO0000000318  
-3. 労働安全衛生規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080032  
-4. 特定化学物質障害予防規則：https://elaws.e-gov.go.jp/document?lawid=353M50000080039  
-5. 有機溶剤中毒予防規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080036  
-6. 鉛中毒予防規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080035  
-7. 石綿障害予防規則：https://elaws.e-gov.go.jp/document?lawid=417M60000080021  
-8. 酸素欠乏症等防止規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080033  
-9. 電離放射線障害防止規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080041  
-10. 事務所衛生基準規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080043
-
-【出力構成】  
-【詳細報告】（各項目300文字以内）  
-① 洗い出し内容  
-② 危険状況  
-③ 改善提案  
-（0）法的要求事項  
-（1）本質的対策  
-（2）工学的対策  
-（3）管理的対策  
-（4）保護具の使用
-
-該当がない場合は「なし」としてください。`;
+洗い出し内容: ${hazard}
+危険状況: ${risk}`;
 
     const response = await fetch('/api/report', {
       method: 'POST',
@@ -113,7 +78,7 @@ export default function InputPanel() {
 
   return (
     <div>
-      <h2>労災リスク報告書ツール（UTF-8版）</h2>
+      <h2>労災リスク報告書ツール（シンプル版）</h2>
       <label>洗い出し内容：</label><br />
       <input type="text" value={hazard} onChange={e => setHazard(e.target.value)} placeholder="直接入力または選択" />
       <select value={hazard} onChange={e => setHazard(e.target.value)}>
