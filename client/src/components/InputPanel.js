@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 // 簡単な災害事例データ（例）
-// 実際には必要に応じてファイルから読み込んでもOK
 const disasterCases = [
   { title: "ボイラー点検中の漏電事故", description: "ボイラー点検中に漏電が発生し作業員が感電した事故です。" },
   { title: "湿気環境での感電死亡事故", description: "湿気の多い場所で絶縁不良が原因で作業員が感電し死亡した事故です。" },
@@ -15,6 +14,7 @@ export default function InputPanel() {
   const [risk, setRisk] = useState('');
   const [detailedReport, setDetailedReport] = useState('');
 
+  // 類似度スコア計算して3件抽出
   const getTop3SimilarCases = () => {
     const keywords = `${hazard} ${risk}`.split(' ');
     const scored = disasterCases.map((c) => {
@@ -29,9 +29,8 @@ export default function InputPanel() {
   };
 
   const handleDetailedReport = () => {
-    const report = `【洗い出し内容】\n${hazard}\n\n【危険状況】\n${risk}\n\n【改善提案】\n・本質安全: 設備の絶縁・防水強化\n・作業手順: 電源遮断と作業許可制\n・教育: 感電防止教育\n・保護具: 絶縁用具の使用\n・設備: 漏電ブレーカー設置\n・点検: 定期的な電気系統点検の実施`;
+    const report = `【洗い出し内容】\n${hazard}\n\n【危険状況】\n${risk}\n\n【改善提案】\n◆ 本質安全: 設備の絶縁・防水強化\n◆ 作業手順: 電源遮断と作業許可制\n◆ 教育: 感電防止教育\n◆ 保護具: 絶縁用具の使用\n◆ 設備: 漏電ブレーカー設置\n◆ 点検: 定期的な電気系統点検の実施`;
 
-    // 例として、安衛則 第333条 を表示
     const legalRequirement = `【法的要求事項】\n安衛則 第333条「漏電による感電の危険を防止するため、漏電遮断装置を接続しなければならない」`;
 
     const similarCases = getTop3SimilarCases();
@@ -44,16 +43,32 @@ export default function InputPanel() {
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: 'auto', fontSize: '1.1em' }}>
-      <h2>労災リスク詳細版レポートツール</h2>
+    <div style={{
+      maxWidth: '600px',
+      margin: '2em auto',
+      fontSize: '1.1em',
+      textAlign: 'left',
+      padding: '1em',
+      boxSizing: 'border-box',
+      background: '#fff',
+      border: '1px solid #ddd',
+      borderRadius: '8px',
+      boxShadow: '0 0 8px rgba(0,0,0,0.1)'
+    }}>
+      <h2 style={{ textAlign: 'center' }}>労災リスク詳細版レポートツール</h2>
 
       <label>洗い出し内容：</label><br />
       <input
         type="text"
         value={hazard}
         onChange={e => setHazard(e.target.value)}
-        placeholder="例: ボイラー点検"
-        style={{ width: '100%', margin: '0.3em 0', padding: '0.5em' }}
+        placeholder="例: はしご"
+        style={{
+          width: '100%',
+          margin: '0.5em 0',
+          padding: '0.5em',
+          fontSize: '1.1em'
+        }}
       /><br />
 
       <label>危険状況：</label><br />
@@ -61,23 +76,39 @@ export default function InputPanel() {
         type="text"
         value={risk}
         onChange={e => setRisk(e.target.value)}
-        placeholder="例: 感電"
-        style={{ width: '100%', margin: '0.3em 0', padding: '0.5em' }}
+        placeholder="例: 墜落"
+        style={{
+          width: '100%',
+          margin: '0.5em 0',
+          padding: '0.5em',
+          fontSize: '1.1em'
+        }}
       /><br />
 
       <button
         onClick={handleDetailedReport}
-        style={{ margin: '1em 0', padding: '0.5em 1em' }}
+        style={{
+          margin: '1em 0',
+          padding: '0.5em 1em',
+          fontSize: '1.1em',
+          background: '#1976d2',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}
       >
         ④ 改善提案（詳細版）を生成
       </button>
 
       {detailedReport && (
         <pre style={{
-          background: '#f0f0f0',
+          background: '#f9f9f9',
           padding: '1em',
           marginTop: '1em',
-          whiteSpace: 'pre-wrap'
+          borderRadius: '4px',
+          whiteSpace: 'pre-wrap',
+          color: '#333'
         }}>
           {detailedReport}
         </pre>
