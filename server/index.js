@@ -70,10 +70,10 @@ app.post('/api/report', async (req, res) => {
   }
 });
 
-// ▼ Reactアプリのビルド成果物を返す部分（client/build） ▼
-app.use(express.static(path.join(__dirname, 'client', 'build')));
+// ▼ Reactアプリのビルド成果物を返す部分（正しいパス！） ▼
+app.use(express.static(path.join(__dirname, '../client/build')));
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 });
 
 // サーバー起動
