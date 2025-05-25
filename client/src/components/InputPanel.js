@@ -12,7 +12,7 @@ export default function InputPanel() {
   const recognitionRef = useRef(null);
 
   const handleSubmit = async () => {
-    const response = await fetch('http://localhost:5000/api/report', {
+    const response = await fetch('/api/report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ hazard, risk })
@@ -24,7 +24,7 @@ export default function InputPanel() {
 
   const handleDetailedReport = async () => {
     const prompt = `あなたは日本の労働安全衛生の専門家です。「${hazard}」という作業環境において「${risk}」の危険があると仮定し、これに対する改善提案を500文字程度で具体的かつ実用的に詳しく述べてください。フォーマルな話し言葉で、語尾は「〜をおすすめします」「〜が望まれます」などで締めてください。以下の5つのカテゴリに分類して出力してください：（0）法的要求事項（1）本質的対策（2）工学的対策（3）管理的対策（4）保護具の使用。該当がない場合は「なし」としてください。`;
-    const response = await fetch('http://localhost:5000/api/report', {
+    const response = await fetch('/api/report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ hazard, risk, prompt })
