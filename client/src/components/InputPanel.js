@@ -1,168 +1,87 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 
-const hazards = ["フォークリフト", "コンベヤー", "プレス機", "足場", "ボイラー", "旋盤", "チェーンソー", "ブルドーザー", "クレーン車", "圧力容器", "電気設備", "階段・はしご道", "支保工", "作業床", "溝・ピット", "引火性の物", "可燃性のガス", "有害物質", "放射線", "環境要因(地面・床面)"];
-const risks = ["墜落・転落", "はさまれ・巻き込まれ", "激突され", "飛来・落下", "崩壊・倒壊", "転倒", "切れ・こすれ", "踏み抜き", "おぼれ", "感電", "火災", "爆発", "破裂", "高温・低温との接触", "有害物等との接触", "交通事故（道路）", "交通事故（その他）", "動作の反動・無理な動作", "その他", "未分類"];
+// 簡単な災害事例データ（例）
+// 実際には必要に応じてファイルから読み込んでもOK
+const disasterCases = [
+  { title: "ボイラー点検中の漏電事故", description: "ボイラー点検中に漏電が発生し作業員が感電した事故です。" },
+  { title: "湿気環境での感電死亡事故", description: "湿気の多い場所で絶縁不良が原因で作業員が感電し死亡した事故です。" },
+  { title: "通電状態での作業中の感電", description: "電源を切らずに修理を行って感電、作業員が意識不明となった事故です。" },
+  { title: "高所作業中の墜落事故", description: "足場の不備により作業者が高所から転落した事故です。" },
+  { title: "電動工具の巻き込まれ事故", description: "電動工具使用中に衣服が巻き込まれて負傷した事故です。" },
+];
 
 export default function InputPanel() {
   const [hazard, setHazard] = useState('');
   const [risk, setRisk] = useState('');
-  const [report, setReport] = useState('');
   const [detailedReport, setDetailedReport] = useState('');
-  const [transcriptText, setTranscriptText] = useState('');
-  const recognitionRef = useRef(null);
 
-  const exampleText = `【出力例】
-① 洗い出し内容：
-解体作業現場において、散乱した旧木材や壁材から露出した釘を踏み抜くリスクがあります。
-② 危険状況：
-歩行経路上に未除去の釘があり、作業者が安全靴を着用していても足底を貫通し、転倒や刺創事故を招くおそれがあります。
-③ 改善提案：
-敷地内の定期的な清掃と歩行ルートの明確化を徹底し、安全靴の点検・交換基準を強化します。`;
-
-  const handleSubmit = async () => {
-    const prompt = `あなたは日本の労働安全衛生の専門家です。
-以下のキーワードをもとに、洗い出し内容と危険状況を必ず背景説明を含めて文章化してください。
-出力は以下の例文を参考にし、同様のトーン・構成・具体性で作成してください。
-語尾は「〜です」「〜ます」調にしてください。
-
-${exampleText}
-
-【キーワード】
-洗い出し内容: ${hazard}
-危険状況: ${risk}`;
-
-    const response = await fetch('/api/report', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ hazard, risk, prompt })
+  const getTop3SimilarCases = () => {
+    const keywords = `${hazard} ${risk}`.split(' ');
+    const scored = disasterCases.map((c) => {
+      const text = `${c.title} ${c.description}`;
+      let score = 0;
+      keywords.forEach(k => {
+        if (text.includes(k)) score++;
+      });
+      return { ...c, score };
     });
-    const data = await response.json();
-    setReport(data.result);
-    setDetailedReport('');
+    return scored.sort((a, b) => b.score - a.score).slice(0, 3);
   };
 
-  const handleDetailedReport = async () => {
-    const prompt = `あなたは日本の労働安全衛生の専門家です。
-以下のキーワードをもとに、洗い出し内容・危険状況を背景説明を含めて200文字程度で詳細に文章化し、その後に改善提案をカテゴリごとに200文字程度でまとめてください。
-最後に必ず関連する災害事例を3件、簡潔な文章でまとめて載せてください。
-出力には法令のURLを一切載せないようにしてください。
-語尾は「〜です」「〜ます」調にしてください。
+  const handleDetailedReport = () => {
+    const report = `【洗い出し内容】\n${hazard}\n\n【危険状況】\n${risk}\n\n【改善提案】\n・本質安全: 設備の絶縁・防水強化\n・作業手順: 電源遮断と作業許可制\n・教育: 感電防止教育\n・保護具: 絶縁用具の使用\n・設備: 漏電ブレーカー設置\n・点検: 定期的な電気系統点検の実施`;
 
-【キーワード】
-洗い出し内容: ${hazard}
-危険状況: ${risk}`;
+    // 例として、安衛則 第333条 を表示
+    const legalRequirement = `【法的要求事項】\n安衛則 第333条「漏電による感電の危険を防止するため、漏電遮断装置を接続しなければならない」`;
 
-    const response = await fetch('/api/report', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ hazard, risk, prompt })
-    });
-    const data = await response.json();
-    setDetailedReport(data.result);
-  };
+    const similarCases = getTop3SimilarCases();
+    const caseSummary = similarCases.map((c, idx) =>
+      `${idx + 1}. ${c.title}（${c.description}）`
+    ).join('\n');
 
-  useEffect(() => {
-    if (!('webkitSpeechRecognition' in window)) return;
-    const recognition = new window.webkitSpeechRecognition();
-    recognition.lang = 'ja-JP';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    recognitionRef.current = recognition;
-  }, []);
-
-  const handleVoiceInput = (type) => {
-    const recognition = recognitionRef.current;
-    if (!recognition) return;
-    try {
-      recognition.start();
-    } catch (error) {
-      if (error.name === 'InvalidStateError') {
-        recognition.stop();
-        recognition.start();
-      } else {
-        console.error("音声認識エラー:", error);
-      }
-    }
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setTranscriptText(`認識結果（${type === 'hazard' ? '洗い出し' : '危険状況'}）：${transcript}`);
-      if (type === 'hazard') setHazard(transcript);
-      if (type === 'risk') setRisk(transcript);
-    };
+    const fullReport = `${report}\n\n${legalRequirement}\n\n【関連災害事例】\n${caseSummary}`;
+    setDetailedReport(fullReport);
   };
 
   return (
-    <div style={{ textAlign: 'center', maxWidth: '500px', margin: 'auto', fontSize: '1.1em' }}>
-      <h2 style={{ fontSize: '1.4em', marginBottom: '1em' }}>労災リスク報告書ツール（例文指示・法令根拠版）</h2>
+    <div style={{ maxWidth: '600px', margin: 'auto', fontSize: '1.1em' }}>
+      <h2>労災リスク詳細版レポートツール</h2>
 
-      <div style={{ marginBottom: '1em' }}>
-        <label>洗い出し内容：</label><br />
-        <input
-          type="text"
-          value={hazard}
-          onChange={e => setHazard(e.target.value)}
-          placeholder="直接入力または選択"
-          style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
-        /><br />
-        <select
-          value={hazard}
-          onChange={e => setHazard(e.target.value)}
-          style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
-        >
-          <option value="">選択してください</option>
-          {hazards.map(h => <option key={h} value={h}>{h}</option>)}
-        </select><br />
-        <button
-          onClick={() => handleVoiceInput('hazard')}
-          style={{ margin: '0.3em', fontSize: '1.1em', padding: '0.5em 1em' }}
-        >🎤 話す</button>
-      </div>
+      <label>洗い出し内容：</label><br />
+      <input
+        type="text"
+        value={hazard}
+        onChange={e => setHazard(e.target.value)}
+        placeholder="例: ボイラー点検"
+        style={{ width: '100%', margin: '0.3em 0', padding: '0.5em' }}
+      /><br />
 
-      <div style={{ marginBottom: '1em' }}>
-        <label>危険状況：</label><br />
-        <input
-          type="text"
-          value={risk}
-          onChange={e => setRisk(e.target.value)}
-          placeholder="直接入力または選択"
-          style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
-        /><br />
-        <select
-          value={risk}
-          onChange={e => setRisk(e.target.value)}
-          style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
-        >
-          <option value="">選択してください</option>
-          {risks.map(r => <option key={r} value={r}>{r}</option>)}
-        </select><br />
-        <button
-          onClick={() => handleVoiceInput('risk')}
-          style={{ margin: '0.3em', fontSize: '1.1em', padding: '0.5em 1em' }}
-        >🎤 話す</button>
-      </div>
+      <label>危険状況：</label><br />
+      <input
+        type="text"
+        value={risk}
+        onChange={e => setRisk(e.target.value)}
+        placeholder="例: 感電"
+        style={{ width: '100%', margin: '0.3em 0', padding: '0.5em' }}
+      /><br />
 
       <button
-        onClick={handleSubmit}
-        style={{ margin: '1em', fontSize: '1.1em', padding: '0.5em 1em' }}
-      >報告書を作成する</button><br />
-
-      {report && (
-        <>
-          <pre style={{ whiteSpace: 'pre-wrap', textAlign: 'left', background: '#f0f0f0', padding: '1em', borderRadius: '8px', margin: '1em 0', fontSize: '1.375em' }}>{report}</pre>
-          <button
-            onClick={handleDetailedReport}
-            style={{ margin: '1em', fontSize: '1.1em', padding: '0.5em 1em' }}
-          >④ 改善提案（詳細版）</button>
-        </>
-      )}
+        onClick={handleDetailedReport}
+        style={{ margin: '1em 0', padding: '0.5em 1em' }}
+      >
+        ④ 改善提案（詳細版）を生成
+      </button>
 
       {detailedReport && (
-        <pre style={{ whiteSpace: 'pre-wrap', color: 'darkblue', textAlign: 'left', background: '#f0f0f0', padding: '1em', borderRadius: '8px', margin: '1em 0', fontSize: '1.375em' }}>
+        <pre style={{
+          background: '#f0f0f0',
+          padding: '1em',
+          marginTop: '1em',
+          whiteSpace: 'pre-wrap'
+        }}>
           {detailedReport}
         </pre>
       )}
-
-      {transcriptText && <p>{transcriptText}</p>}
     </div>
   );
 }
