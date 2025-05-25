@@ -43,21 +43,10 @@ ${exampleText}
 
   const handleDetailedReport = async () => {
     const prompt = `あなたは日本の労働安全衛生の専門家です。
-以下のキーワードをもとに、洗い出し内容・危険状況を必ず背景説明を含めて200文字程度で詳細に文章化し、その後に改善提案をカテゴリごとに200文字程度でまとめてください。
-特に「法令要求事項」の部分では、以下のe-Gov法令検索URLを根拠に、各項目に該当する条項の内容（1件100文字程度）を必ず具体的に引用・説明してください。
+以下のキーワードをもとに、洗い出し内容・危険状況を背景説明を含めて200文字程度で詳細に文章化し、その後に改善提案をカテゴリごとに200文字程度でまとめてください。
+最後に必ず関連する災害事例を3件、簡潔な文章でまとめて載せてください。
+出力には法令のURLを一切載せないようにしてください。
 語尾は「〜です」「〜ます」調にしてください。
-
-【e-Gov法令検索URL】
-1. 労働安全衛生法：https://elaws.e-gov.go.jp/document?lawid=347AC0000000057
-2. 労働安全衛生法施行令：https://elaws.e-gov.go.jp/document?lawid=347CO0000000318
-3. 労働安全衛生規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080032
-4. 特定化学物質障害予防規則：https://elaws.e-gov.go.jp/document?lawid=353M50000080039
-5. 有機溶剤中毒予防規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080036
-6. 鉛中毒予防規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080035
-7. 石綿障害予防規則：https://elaws.e-gov.go.jp/document?lawid=417M60000080021
-8. 酸素欠乏症等防止規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080033
-9. 電離放射線障害防止規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080041
-10. 事務所衛生基準規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080043
 
 【キーワード】
 洗い出し内容: ${hazard}
