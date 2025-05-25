@@ -1,16 +1,22 @@
 {
   "name": "risk-report",
   "private": true,
+
   "scripts": {
-    "start": "concurrently \"npm run start --prefix server\" \"npm run start --prefix client\"",
-    "build": "npm run build --prefix client"
+    "build": "npm run build --prefix client",
+    "start": "node server/index.js",
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm start --prefix client\""
   },
+
   "dependencies": {
-    "concurrently": "^8.0.1",
     "cors": "^2.8.5",
     "csv-parser": "^3.2.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "node-fetch": "^3.3.2"
+  },
+
+  "devDependencies": {
+    "concurrently": "^8.0.1"
   }
 }
