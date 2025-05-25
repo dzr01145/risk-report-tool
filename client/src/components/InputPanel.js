@@ -11,8 +11,27 @@ export default function InputPanel() {
   const [transcriptText, setTranscriptText] = useState('');
   const recognitionRef = useRef(null);
 
+  const exampleText = `【出力例】
+① 洗い出し内容：
+解体作業現場において、散乱した旧木材や壁材から露出した釘を踏み抜くリスクがあります。
+
+② 危険状況：
+歩行経路上に未除去の釘があり、作業者が安全靴を着用していても足底を貫通し、転倒や刺創事故を招くおそれがあります。
+
+③ 改善提案：
+敷地内の定期的な清掃と歩行ルートの明確化を徹底し、安全靴の点検・交換基準を強化します。`;
+
   const handleSubmit = async () => {
-    const prompt = `あなたは日本の労働安全衛生の専門家です。入力されたキーワードをもとに、予見しうる労働災害を踏まえた「洗い出し内容」と「危険状況」を具体的に想定・文章化し、簡単な改善提案をまとめてください。語尾は「〜です」「〜ます」調にしてください。 ${hazard}を踏まえて洗い出し内容を表記、${risk}を踏まえて危険状況を表記　それぞれ150文字`;
+    const prompt = `あなたは日本の労働安全衛生の専門家です。
+以下のキーワードをもとに、洗い出し内容と危険状況を必ず背景説明を含めて文章化してください。
+出力は以下の例文を参考にし、同様のトーン・構成・具体性で作成してください。
+語尾は「〜です」「〜ます」調にしてください。
+
+${exampleText}
+
+【キーワード】
+洗い出し内容: ${hazard}
+危険状況: ${risk}`;
 
     const response = await fetch('/api/report', {
       method: 'POST',
@@ -25,7 +44,16 @@ export default function InputPanel() {
   };
 
   const handleDetailedReport = async () => {
-    const prompt = `あなたは日本の労働安全衛生の専門家です。入力されたキーワードをもとに、予見しうる労働災害を踏まえた「洗い出し内容」と「危険状況」を具体的に想定・文章化し、詳細な改善提案をまとめてください。語尾は「〜です」「〜ます」調にしてください。 ${hazard}を踏まえて洗い出し内容を詳細に表記、${risk}を踏まえて危険状況を詳細に表記　それぞれ300文字`;
+    const prompt = `あなたは日本の労働安全衛生の専門家です。
+以下のキーワードをもとに、洗い出し内容・危険状況を必ず背景説明を含めて300文字程度で詳細に文章化し、その後に改善提案をカテゴリごとにまとめてください。
+出力は以下の例文を参考に、同様のトーン・構成・具体性で作成してください。
+語尾は「〜です」「〜ます」調にしてください。
+
+${exampleText}
+
+【キーワード】
+洗い出し内容: ${hazard}
+危険状況: ${risk}`;
 
     const response = await fetch('/api/report', {
       method: 'POST',
@@ -68,7 +96,7 @@ export default function InputPanel() {
 
   return (
     <div style={{ textAlign: 'center', maxWidth: '500px', margin: 'auto', fontSize: '1.1em' }}>
-      <h2 style={{ fontSize: '1.4em', marginBottom: '1em' }}>労災リスク報告書ツール（UTF-8版）</h2>
+      <h2 style={{ fontSize: '1.4em', marginBottom: '1em' }}>労災リスク報告書ツール（例文指示版）</h2>
 
       <div style={{ marginBottom: '1em' }}>
         <label>洗い出し内容：</label><br />
