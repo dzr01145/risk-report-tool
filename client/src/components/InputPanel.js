@@ -11,6 +11,25 @@ export default function InputPanel() {
   const [transcriptText, setTranscriptText] = useState('');
   const recognitionRef = useRef(null);
 
+
+
+
+const fetchLawArticle = async (lawNum, articleNum) => {
+  const url = `https://elaws.e-gov.go.jp/api/1/articles;lawNum=${encodeURIComponent(lawNum)};article=${encodeURIComponent(articleNum)}`;
+  const response = await fetch(url);
+  const xmlText = await response.text();
+
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+  const lawContents = xmlDoc.getElementsByTagName("LawContents")[0]?.textContent;
+
+  return lawContents || "該当条文が見つかりませんでした";
+};
+
+
+
+
+
   const exampleText = `【出力例】
 ① 洗い出し内容：
 解体作業現場において、散乱した旧木材や壁材から露出した状況が見られます。そのため、作業者が◎◯の危険源に近接する機会が多くなっていますしています。
@@ -42,24 +61,23 @@ ${exampleText}
   };
 
   const handleDetailedReport = async () => {
-    const prompt = `あなたは日本の労働安全衛生の専門家です。
-以下のキーワードでタイトルを表示するとともとに、関連する内容を背景説明を含めて200文字程度で要点をまとめつつわかりやすく文章化
 
-なお、法的要求事項は前段の洗い出し内容と危険状況を必ず背景説明を踏まえ以下のe-Gov法令検索URLを根拠に、  
-条文番号とその内容（各項目150文字程度以内）を作成してください。  
+
+  // まず、例として労働安全衛生法第28条を取得
+  const lawNum = "347AC0000000057"; // 例: 労働安全衛生法
+  const articleNum = "第28条"; // 例: 条文番号
+  const lawText = await fetchLawArticle(lawNum, articleNum);
+
+
+
+
+
+    const prompt = `あなたは日本の労働安全衛生の専門家です。
+以下のキーワードでタイトルを表示するとともとに、関連する内容を背景説明を含めて200文字程度で要点をまとめつつわかりやすく文章化してください。
+
+なお、法的要求事項は前段の洗い出し内容と危険状況を必ず背景説明を踏まえ、条文番号とその内容（各項目150文字程度以内）を作成してください。  
 語尾は「〜です」「〜ます」調にしてください。
 
-【e-Gov法令検索URL】  
-1. 労働安全衛生法：https://elaws.e-gov.go.jp/document?lawid=347AC0000000057  
-2. 労働安全衛生法施行令：https://elaws.e-gov.go.jp/document?lawid=347CO0000000318  
-3. 労働安全衛生規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080032  
-4. 特定化学物質障害予防規則：https://elaws.e-gov.go.jp/document?lawid=353M50000080039  
-5. 有機溶剤中毒予防規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080036  
-6. 鉛中毒予防規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080035  
-7. 石綿障害予防規則：https://elaws.e-gov.go.jp/document?lawid=417M60000080021  
-8. 酸素欠乏症等防止規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080033  
-9. 電離放射線障害防止規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080041  
-10. 事務所衛生基準規則：https://elaws.e-gov.go.jp/document?lawid=347M50000080043  
 
 
 最後に必ず洗い出し内容と危険状況に関連する災害事例を3件、タイトルと簡潔な文章で番号付きでまとめて載せてください。
@@ -72,6 +90,9 @@ ${exampleText}
 
 ・危険状況: ${risk}
 
+・法的要求事項の遵守: ${lawText}
+
+
 ［改善提案詳細］
 
 (1) 洗い出し内容：  （300文字程度）
@@ -80,7 +101,7 @@ ${exampleText}
 
 (3) 改善提案：  
 
-① 法的要求事項の遵守（1300文字程度 最大5件　　例：・労働安全衛生法第〇条：***********）  
+① 法的要求事項の遵守（300文字程度 最大3件　　例：・労働安全衛生法第〇条：***********）  
 ② 本質的対策（300文字程度）  
 ③ 工学的対策（300文字程度）  
 ④ 管理的対策（300文字程度）  
@@ -96,6 +117,9 @@ ${exampleText}
     setDetailedReport(data.result);
   };
 
+
+
+
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window)) return;
     const recognition = new window.webkitSpeechRecognition();
@@ -104,6 +128,11 @@ ${exampleText}
     recognition.maxAlternatives = 1;
     recognitionRef.current = recognition;
   }, []);
+
+
+
+
+
 
   const handleVoiceInput = (type) => {
     const recognition = recognitionRef.current;
