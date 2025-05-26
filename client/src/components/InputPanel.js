@@ -80,7 +80,7 @@ ${exampleText}
 
 (3) 改善提案：  
 
-① 法的要求事項の遵守（300文字程度　　例：・労働安全衛生法第〇条：***********）  
+① 法的要求事項の遵守（1300文字程度 最大5件　　例：・労働安全衛生法第〇条：***********）  
 ② 本質的対策（300文字程度）  
 ③ 工学的対策（300文字程度）  
 ④ 管理的対策（300文字程度）  
@@ -128,7 +128,7 @@ ${exampleText}
 
   return (
     <div style={{ textAlign: 'center', maxWidth: '500px', margin: 'auto', fontSize: '1.1em' }}>
-      <h2 style={{ fontSize: '1.4em', marginBottom: '1em' }}>労働災害リスクファインディングツール</h2>
+      <h2 style={{ fontSize: '1.4em', marginBottom: '1em' }}>労働災害リスクファインダー</h2>
 
 
 
