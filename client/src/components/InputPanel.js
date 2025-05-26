@@ -50,39 +50,38 @@ ${exampleText}
 洗い出し内容: ${hazard}
 危険状況: ${risk}`;
 
-    const response = await fetch('/api/report', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ hazard, risk, prompt })
-    });
-    const data = await response.json();
-    setReport(data.result);
-    setDetailedReport('');
-  };
 
-  const handleDetailedReport = async () => {
-
-
-  // まず、例として労働安全衛生法第28条を取得
+const handleDetailedReport = async () => {
+  // 最大3件まで取得する
   const lawNum = "347AC0000000057"; // 例: 労働安全衛生法
-  const articleNum = "第28条"; // 例: 条文番号
-  const lawText = await fetchLawArticle(lawNum, articleNum);
+  const articleNums = ["第28条", "第59条", "第100条"]; // 例: 必要に応じて調整
+  const lawArticles = [];
 
+  for (const articleNum of articleNums) {
+    const text = await fetchLawArticle(lawNum, articleNum);
+    if (text && text !== "該当条文が見つかりませんでした") {
+      lawArticles.push(`・労働安全衛生法${articleNum}: ${text}`);
+      if (lawArticles.length >= 3) break;
+    }
+  }
 
+  const lawTextBlock = lawArticles.length > 0
+    ? `① 法的要求事項の遵守\n${lawArticles.join("\n")}`
+    : "① 法的要求事項の遵守\n※該当条文の取得結果がありませんでした";
 
 
 
     const prompt = `あなたは日本の労働安全衛生の専門家です。
 以下のキーワードでタイトルを表示するとともとに、関連する内容を背景説明を含めて200文字程度で要点をまとめつつわかりやすく文章化してください。
 
-なお、法的要求事項は前段の洗い出し内容と危険状況を必ず背景説明を踏まえ、条文番号とその内容を最大3件、省略せずに条文そのまま引用してください。  
+
+なお、法的要求事項は、前段の洗い出し内容と危険状況を必ず背景説明を踏まえ、条文番号とその内容を最大3件、省略せずに条文そのまま引用してください。また、取得できたもののみ引用し、省略や適当な文は入れないでください。 
+
+
+ 
 語尾は「〜です」「〜ます」調にしてください。
-
-
 
 最後に必ず洗い出し内容と危険状況に関連する災害事例を3件、タイトルと簡潔な文章で番号付きでまとめて載せてください。
-出力には法令のURLを一切載せないようにしてください。
-語尾は「〜です」「〜ます」調にしてください。
 
 【キーワード】
 
@@ -90,7 +89,7 @@ ${exampleText}
 
 ・危険状況: ${risk}
 
-・法的要求事項の遵守: ${lawText}
+・法的要求事項の遵守:${lawTextBlock}
 
 
 ［改善提案詳細］
@@ -101,7 +100,7 @@ ${exampleText}
 
 (3) 改善提案：  
 
-① 法的要求事項の遵守（法的要求事項は前段の洗い出し内容と危険状況を必ず背景説明を踏まえ、条文番号とその内容を最大3件、省略せずに条文そのまま引用してください。　　例：・労働安全衛生法第〇条◯：***********）  
+① 法的要求事項の遵守（取得できたもののみ引用してください）  
 ② 本質的対策（300文字程度）  
 ③ 工学的対策（300文字程度）  
 ④ 管理的対策（300文字程度）  
