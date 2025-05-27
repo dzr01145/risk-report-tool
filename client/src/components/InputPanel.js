@@ -11,16 +11,6 @@ export default function InputPanel() {
   const [transcriptText, setTranscriptText] = useState('');
   const recognitionRef = useRef(null);
 
-  const fetchLawArticle = async (lawNum, articleNum) => {
-    const url = `https://elaws.e-gov.go.jp/api/1/articles;lawNum=${encodeURIComponent(lawNum)};article=${encodeURIComponent(articleNum)}`;
-    const response = await fetch(url);
-    const xmlText = await response.text();
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-    const lawContents = xmlDoc.getElementsByTagName("LawContents")[0]?.textContent;
-    return lawContents || "該当条文が見つかりませんでした";
-  };
-
   const exampleText = `【出力例】
 ① 洗い出し内容：
 解体作業現場において、散乱した旧木材や壁材から露出した状況が見られます。そのため、作業者が◎◯の危険源に近接する機会が多くなっています。
@@ -28,6 +18,17 @@ export default function InputPanel() {
 歩行経路上に未除去の釘があり、作業者の不注意などの要因から安全靴を着用していても足底を貫通し、転倒や刺創事故を招くおそれがあります。
 ③ 改善提案：
 敷地内の定期的な清掃と歩行ルートの明確化を徹底し、安全靴の点検・交換基準を強化します。`;
+
+  const fetchLawArticle = async (lawNum, articleNum) => {
+    const numericArticle = articleNum.replace(/[^0-9]/g, '');
+    const url = `https://elaws.e-gov.go.jp/api/1/articles;lawNum=${encodeURIComponent(lawNum)};article=${encodeURIComponent(numericArticle)}`;
+    const response = await fetch(url);
+    const xmlText = await response.text();
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+    const lawContents = xmlDoc.getElementsByTagName("LawContents")[0]?.textContent;
+    return lawContents || "該当条文が見つかりませんでした";
+  };
 
   const handleSubmit = async () => {
     const prompt = `あなたは日本の労働安全衛生の専門家です。
@@ -57,9 +58,10 @@ ${exampleText}
     const lawArticles = [];
 
     for (const articleNum of articleNums) {
-      const text = await fetchLawArticle(lawNum, articleNum);
+      const numericArticle = articleNum.replace(/[^0-9]/g, '');
+      const text = await fetchLawArticle(lawNum, numericArticle);
       if (text && text !== "該当条文が見つかりませんでした") {
-        lawArticles.push(`・労働安全衛生法${articleNum}: ${text}`);
+        lawArticles.push(`・労働安全衛生法第${numericArticle}条: ${text}`);
         if (lawArticles.length >= 3) break;
       }
     }
@@ -72,7 +74,6 @@ ${exampleText}
 以下のキーワードでタイトルを表示するとともに、関連する内容を背景説明を含めて200文字程度で要点をまとめつつわかりやすく文章化してください。
 なお、法的要求事項は、前段の洗い出し内容と危険状況を必ず背景説明を踏まえ、条文番号とその内容を最大3件、省略せずに条文そのまま引用してください。また、取得できたもののみ引用し、省略や適当な文は入れないでください。
 語尾は「〜です」「〜ます」調にしてください。
-
 最後に必ず洗い出し内容と危険状況に関連する災害事例を3件、タイトルと簡潔な文章で番号付きでまとめて載せてください。
 
 【キーワード】
@@ -132,62 +133,34 @@ ${exampleText}
   return (
     <div style={{ textAlign: 'center', maxWidth: '500px', margin: 'auto', fontSize: '1.1em' }}>
       <h2 style={{ fontSize: '1.4em', marginBottom: '1em' }}>労働災害リスクファインダー</h2>
-      {/* 入力UI */}
       <div style={{ marginBottom: '1em' }}>
         <label style={{ fontWeight: 'bold', fontSize: '1.2em' }}>【洗い出し内容】</label><br />
-        <input
-          type="text"
-          value={hazard}
-          onChange={e => setHazard(e.target.value)}
-          placeholder="直接入力または選択"
-          style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
-        /><br />
-        <select
-          value={hazard}
-          onChange={e => setHazard(e.target.value)}
-          style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
-        >
+        <input type="text" value={hazard} onChange={e => setHazard(e.target.value)} placeholder="直接入力または選択" style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }} /><br />
+        <select value={hazard} onChange={e => setHazard(e.target.value)} style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}>
           <option value="">選択してください</option>
           {hazards.map(h => <option key={h} value={h}>{h}</option>)}
         </select><br />
         <button onClick={() => handleVoiceInput('hazard')} style={{ margin: '0.3em', fontSize: '1.1em', padding: '0.5em 1em' }}>🎤 話す</button>
       </div>
-
       <div style={{ marginBottom: '1em' }}>
         <label style={{ fontWeight: 'bold', fontSize: '1.2em' }}>【危険状況】</label><br />
-        <input
-          type="text"
-          value={risk}
-          onChange={e => setRisk(e.target.value)}
-          placeholder="直接入力または選択"
-          style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
-        /><br />
-        <select
-          value={risk}
-          onChange={e => setRisk(e.target.value)}
-          style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}
-        >
+        <input type="text" value={risk} onChange={e => setRisk(e.target.value)} placeholder="直接入力または選択" style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }} /><br />
+        <select value={risk} onChange={e => setRisk(e.target.value)} style={{ width: '80%', margin: '0.3em 0', fontSize: '1.1em', padding: '0.5em' }}>
           <option value="">選択してください</option>
           {risks.map(r => <option key={r} value={r}>{r}</option>)}
         </select><br />
         <button onClick={() => handleVoiceInput('risk')} style={{ margin: '0.3em', fontSize: '1.1em', padding: '0.5em 1em' }}>🎤 話す</button>
       </div>
-
       <button onClick={handleSubmit} style={{ margin: '1em', fontSize: '1.1em', padding: '0.5em 1em' }}>報告書を作成する</button><br />
-
       {report && (
         <>
           <pre style={{ whiteSpace: 'pre-wrap', textAlign: 'left', background: '#f0f0f0', padding: '1em', borderRadius: '8px', margin: '1em 0', fontSize: '1.375em' }}>{report}</pre>
           <button onClick={handleDetailedReport} style={{ margin: '1em', fontSize: '1.1em', padding: '0.5em 1em' }}>④ 改善提案（詳細版）</button>
         </>
       )}
-
       {detailedReport && (
-        <pre style={{ whiteSpace: 'pre-wrap', color: 'darkblue', textAlign: 'left', background: '#f0f0f0', padding: '1em', borderRadius: '8px', margin: '1em 0', fontSize: '1.375em' }}>
-          {detailedReport}
-        </pre>
+        <pre style={{ whiteSpace: 'pre-wrap', color: 'darkblue', textAlign: 'left', background: '#f0f0f0', padding: '1em', borderRadius: '8px', margin: '1em 0', fontSize: '1.375em' }}>{detailedReport}</pre>
       )}
-
       {transcriptText && <p>{transcriptText}</p>}
     </div>
   );
